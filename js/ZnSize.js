@@ -241,7 +241,7 @@ class ZnSize {
      * @returns {null}
      */
   autoSize (timeout) {
-    // timeout = typeof timeout === "undefined" ? 100 : timeout //Currently override MutationObserver due to some buggy width detection
+    // timeout = typeof timeout === "undefined" ? 100 : timeout //Currently override MutationObserver due to some bugs
     if (this.auto) {
       this.auto = false
       if (this.observer === null) {
@@ -303,6 +303,9 @@ class ZnSize {
   setupMutation () {
     let MutationClass = window.MutationObserver || window.WebKitMutationObserver
     let observer = new MutationClass((mutations, observer) => {
+      // setTimeout(() => {
+      //   this.setSize()
+      // }, 100)
       this.setSize()
     })
     observer.observe(document.querySelector('body'), {
@@ -320,6 +323,7 @@ class ZnSize {
      * Check if a size has changed
      * @param originalValue
      * @param newValue
+     * @param tolerance
      * @returns {boolean}
      */
   sizeChanged (originalValue, newValue, tolerance) {
