@@ -5,9 +5,20 @@
     <title>iFrame Child</title>
 </head>
 <body>
-<button id="toggleBoxSize">Toggle Box Size</button><hr />
-<button id="updatePageSize">Update Page Size</button><hr />
-<div style="width: 50px; height: 50px; background-color: red" id="target-box"></div>
-<script src="js/child.js"></script>
+    <div class="wrapper">
+        <div>Auto Resize: <span id="autosize-status">On</span></div>
+        <button id="toggleBoxSize">Toggle Box Size</button>
+        <button id="updatePageSize">Update Page Size</button>
+        <button id="autoToggle">Toggle Auto Update</button>
+        <p>
+            <form id="manual">
+                <label for="height">Height:</label><input type="text" name="height" id="manualHeight" placeholder="Height"><br />
+                <label for="width">Width:</label><input type="text" name="width" id="manualWidth" placeholder="Width"><br />
+                <div align="center"><button type="submit" id="manualSizeTrigger">Change</button></div>
+            </form>
+        </p>
+        <div style="width: 50px; height: 50px; background-color: red" id="target-box"></div>
+        <script src="js/child.js"></script>
+    </div>
 </body>
 </html>

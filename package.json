@@ -2,5 +2,15 @@
   "name": "ifresize",
   "version": "1.0.0",
   "main": "index.js",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "parcel-bundler": "^1.12.3",
+    "testcafe": "^1.1.4"
+  },
+  "scripts": {
+    "dev": "parcel *.html",
+    "build": "parcel build *.html",
+    "now-build": "npm run build",
+    "test": "testcafe chrome:headless,firefox:headless tests/*-test.js"
+  }
 }

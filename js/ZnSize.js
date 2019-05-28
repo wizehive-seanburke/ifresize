@@ -1,33 +1,9 @@
 //TODO: Check into using Mutation​Observer, example: https://github.com/davidjbradshaw/iframe-resizer
-
-const getHeight = () => {
-    // const document = window.document;
-    // const bodyTop = Math.max(document.body.offsetTop, 0);
-    // const documentTop = Math.max(document.documentElement.offsetTop, 0);
-    // const bodyScroll = document.body.scrollHeight + bodyTop;
-    // const bodyOffset = document.body.offsetHeight + bodyTop;
-    // const documentScroll = document.documentElement.scrollHeight + documentTop;
-    // const documentOffset = document.documentElement.offsetHeight + documentTop;
-    // return Math.max(bodyScroll, bodyOffset, documentScroll, documentOffset);
-    return heightCalc.bodyOffset();
-}
-
-const getWidth = () => {
-    const document = window.document;
-    const bodyLeft = Math.max(document.body.offsetLeft, 0);
-    const documentLeft = Math.max(document.documentElement.offsetLeft, 0);
-    const bodyScroll = document.body.scrollWidth + bodyLeft;
-    const bodyOffset = document.body.offsetWidth + bodyLeft;
-    const documentScroll = document.documentElement.scrollWidth + documentLeft;
-    const documentOffset = document.documentElement.offsetWidth + documentLeft;
-    return Math.max(bodyScroll, bodyOffset, documentScroll, documentOffset);
-}
-
 //From: https://github.com/davidjbradshaw/iframe-resizer/blob/772f24df77444aff5e6520ce31bf93111c70f0b3/js/iframeResizer.contentWindow.js#L853
-const getComputedStyle = (prop, el) => {
+const getComputedStyle = (prop, element) => {
     let value = 0
-    el = el || document.body
-    value = document.defaultView.getComputedStyle(el, null)
+    element = element || document.body
+    value = document.defaultView.getComputedStyle(element, null)
     value = null !== value ? value[prop] : 0
     return parseInt(value, 10)
 }
@@ -62,20 +38,47 @@ const heightCalc = {
     documentElementScroll: () => {
         return document.documentElement.scrollHeight
     },
-    lowestElement: () => {
+    furthestElement: () => {
         return Math.max(heightCalc.bodyOffset() || heightCalc.documentElementOffset(), getMaxElement('bottom', getAllElements()))
     },
     min: () => {
         return Math.min.apply(null, getAllMeasurements(heightCalc))
+    },
+    max: () => {
+        return Math.max.apply(null, getAllMeasurements(heightCalc))
     }
 }
 
-const getAllMeasurements = (dimension) => {
+const widthCalc = {
+    bodyOffset: () => {
+        return document.body.scrollWidth
+    },
+    bodyScroll: () => {
+        return document.body.scrollWidth
+    },
+    documentElementOffset: () => {
+        return document.documentElement.offsetWidth
+    },
+    documentElementScroll: () => {
+        return document.documentElement.scrollWidth
+    },
+    furthestElement: () => {
+        return Math.max(widthCalc.bodyOffset() || widthCalc.documentElementOffset(), getMaxElement('right', getAllElements()))
+    },
+    min: () => {
+        return Math.min.apply(null, getAllMeasurements(widthCalc))
+    },
+    max: () => {
+        return Math.max.apply(null, getAllMeasurements(widthCalc))
+    }
+}
+
+const getAllMeasurements = (dimCalc) => {
     return [
-        dimension.bodyOffset(),
-        dimension.bodyScroll(),
-        dimension.documentElementOffset(),
-        dimension.documentElementScroll()
+        dimCalc.bodyOffset(),
+        dimCalc.bodyScroll(),
+        dimCalc.documentElementOffset(),
+        dimCalc.documentElementScroll()
     ]
 }
 
@@ -88,9 +91,12 @@ const capitalizeFirstLetter = (string) => {
 };
 
 class ZnSize {
-    constructor(client) {
-        this.client = client;
-        this.timer = null;
+    constructor(client, method) {
+        this.client = client
+        this.timer = null
+        this.method = typeof method === 'string' ? method : 'bodyOffset'
+        this.observer = null
+        this.auto = false
     }
     setSize(dimensions) {
         console.log('In setSize');
@@ -98,28 +104,65 @@ class ZnSize {
             dimensions = {};
         }
         if (!dimensions.height) {
-            dimensions.height = getHeight() + 'px';
+            dimensions.height = this.getHeight() + 'px'
         }
         if (!dimensions.width) {
-            dimensions.width =  getWidth() + 'px';
+            dimensions.width =  this.getWidth() + 'px'
         }
         console.log(dimensions);
-        this.client.call('resize', {dimensions}, null, Infinity);
+        this.client.call('resize', {dimensions}, null, Infinity)
     }
     autoSize(timeout) {
-        console.log('In autosize');
-        typeof timeout === 'number' || typeof timeout === 'undefined' || timeout
+        console.log ('autoSize');
+        console.log({'timeout': timeout})
+        if (this.auto) {
+            this.auto = false
+            if (this.observer === null) {
+                if (this.timer === null) {
+                    return null
+                } else {
+                    clearInterval(this.timer)
+                    this.timer = null
+                }
+            } else {
+                this.observer.disconnect()
+                this.observer = false;
+            }
+            return null
+        }
+        this.setSize()
+        typeof timeout === 'number'
             ? this.timer = setInterval(() => {
                 this.setSize()
             }, timeout)
-            : clearTimeout(this.timer);
+            : this.observer = this.setupMutation()
+        this.auto = true
     }
     getWidth() {
-        return getWidth()
+        console.log(this.method)
+        return widthCalc[this.method]()
     }
     getHeight() {
-        return getHeight()
+        return heightCalc[this.method]()
+    }
+    isAutoEnabled() {
+        return this.auto
+    }
+    setupMutation() {
+        let mutationClass = window.MutationObserver || window.WebKitMutationObserver
+        let observer = new mutationClass((mutations, observer) => {
+            this.setSize()
+        })
+        observer.observe(document.querySelector('body'), {
+            attributes: true,
+            attributeOldValue: false,
+            characterData: true,
+            characterDataOldValue: false,
+            childList: true,
+            subtree: true
+        })
+        return observer
     }
 }
 
-export default ZnSize;
+export default ZnSize
