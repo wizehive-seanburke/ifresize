@@ -10,6 +10,10 @@ client.start()
 let dimensions = { 'height': '100px', 'width': '300px' }
 client.call('resize', { dimensions }, null, Infinity)
 
+client.subscribe('dimensions', function (result, error) {
+  sizer.setSize(result)
+})
+
 document.getElementById('toggleBoxSize').addEventListener('click', (e) => {
   let target = document.getElementById('targetBox')
   if (target.style.height !== '300px') {
