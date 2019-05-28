@@ -3,21 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <title>iFrame Child</title>
+<!--    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">-->
 </head>
 <body>
     <div class="wrapper">
-        <div>Auto Resize: <span id="autosize-status">On</span></div>
+        <div>Auto Resize: <span id="autosizeStatus">On</span></div>
         <button id="toggleBoxSize">Toggle Box Size</button>
         <button id="updatePageSize">Update Page Size</button>
         <button id="autoToggle">Toggle Auto Update</button>
-        <p>
-            <form id="manual">
+        <form id="manual">
+            <fieldset>
+                <legend>Change iFrame Size</legend>
+                <div><small>This will disable autoresize</small></div>
                 <label for="height">Height:</label><input type="text" name="height" id="manualHeight" placeholder="Height"><br />
                 <label for="width">Width:</label><input type="text" name="width" id="manualWidth" placeholder="Width"><br />
                 <div align="center"><button type="submit" id="manualSizeTrigger">Change</button></div>
-            </form>
-        </p>
-        <div style="width: 50px; height: 50px; background-color: red" id="target-box"></div>
+            </fieldset>
+        </form>
+        <form id="boxSize">
+            <fieldset>
+                <legend>Change Box Size</legend>
+                <label for="height">Height:</label><input type="text" name="height" id="boxSizeHeight" placeholder="Height"><br />
+                <label for="width">Width:</label><input type="text" name="width" id="boxSizeWidth" placeholder="Width"><br />
+                <div align="center"><button type="submit" id="boxSizeTrigger">Change</button></div>
+            </fieldset>
+        </form>
+        <div style="width: 50px; height: 50px; background-color: red" id="targetBox"></div>
         <script src="js/child.js"></script>
     </div>
 </body>

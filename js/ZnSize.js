@@ -1,5 +1,12 @@
-//TODO: Check into using Mutation​Observer, example: https://github.com/davidjbradshaw/iframe-resizer
-//From: https://github.com/davidjbradshaw/iframe-resizer/blob/772f24df77444aff5e6520ce31bf93111c70f0b3/js/iframeResizer.contentWindow.js#L853
+//Based on: https://github.com/davidjbradshaw/iframe-resizer
+//Goal is to make a simple resize system
+
+/**
+ * Get the int value of a property for an element
+ * @param prop
+ * @param element
+ * @returns {number}
+ */
 const getComputedStyle = (prop, element) => {
     let value = 0
     element = element || document.body
@@ -8,6 +15,12 @@ const getComputedStyle = (prop, element) => {
     return parseInt(value, 10)
 }
 
+/**
+ * Get the largest element based on the target page side & given elements
+ * @param side
+ * @param elements
+ * @returns {number}
+ */
 const getMaxElement = (side, elements) => {
     let elementsLength = elements.length,
         elVal = 0,
@@ -15,7 +28,7 @@ const getMaxElement = (side, elements) => {
         Side = capitalizeFirstLetter(side),
         timer = Date.now || function() { return new Date().getTime() }
     for (let i = 0; i < elementsLength; i++) {
-        elVal = elements[i].getBoundingClientRect()[side] + getComputedStyle('margin' + Side, elements[i])
+        elVal = elements[i].getBoundingClientRect()[side] + getComputedStyle(`margin${Side}`, elements[i])
         console.log({'element': elements[i], 'val': elVal})
         if (elVal > maxVal) {
             console.log({'elVal': elVal, 'maxVal': maxVal})
@@ -26,53 +39,121 @@ const getMaxElement = (side, elements) => {
 }
 
 const heightCalc = {
+    /**
+     * Get the body.offsetHeight
+     * @returns {number}
+     */
     bodyOffset: () => {
         return document.body.offsetHeight + getComputedStyle('marginTop') + getComputedStyle('marginBottom')
     },
+    /**
+     * Get the body.scrollHeight
+     * @returns {number}
+     */
     bodyScroll: () => {
         return document.body.scrollHeight
     },
+    /**
+     * Get the documentElement.offsetHeight
+     * @returns {number}
+     */
     documentElementOffset: () => {
         return document.documentElement.offsetHeight
     },
+    /**
+     * Get the documentElement.scrollHeight
+     * @returns {number}
+     */
     documentElementScroll: () => {
         return document.documentElement.scrollHeight
     },
+    /**
+     * Get the height of the element that's closest to the bottom of the page
+     * @returns {number}
+     */
     furthestElement: () => {
         return Math.max(heightCalc.bodyOffset() || heightCalc.documentElementOffset(), getMaxElement('bottom', getAllElements()))
     },
+    /**
+     * Get the min value of all the base measurements
+     * @returns {number}
+     */
     min: () => {
         return Math.min.apply(null, getAllMeasurements(heightCalc))
     },
+    /**
+     * Get the max value of all the base measurements
+     * @returns {number}
+     */
     max: () => {
         return Math.max.apply(null, getAllMeasurements(heightCalc))
     }
 }
 
 const widthCalc = {
+    /**
+     * Get the body.offsetWidth
+     * @returns {number}
+     */
     bodyOffset: () => {
-        return document.body.scrollWidth
+        return document.body.offsetWidth
     },
+    /**
+     * Get the body.scrollWidth
+     * @returns {number}
+     */
     bodyScroll: () => {
         return document.body.scrollWidth
     },
+    /**
+     * Get the documentElement.offsetWidth
+     * @returns {number}
+     */
     documentElementOffset: () => {
         return document.documentElement.offsetWidth
     },
+    /**
+     * Get the documentElement.scrollWidth
+     * @returns {number}
+     */
     documentElementScroll: () => {
         return document.documentElement.scrollWidth
     },
+    /**
+     * Get the width of the element that's furthest to the right of the page
+     * @returns {number}
+     */
     furthestElement: () => {
         return Math.max(widthCalc.bodyOffset() || widthCalc.documentElementOffset(), getMaxElement('right', getAllElements()))
     },
+    /**
+     * Get the min value of all the base measurements
+     * @returns {number}
+     */
     min: () => {
         return Math.min.apply(null, getAllMeasurements(widthCalc))
     },
+    /**
+     * Get the max value of all the base measurements
+     * @returns {number}
+     */
     max: () => {
         return Math.max.apply(null, getAllMeasurements(widthCalc))
+    },
+    /**
+     * Gets the max of body.scrollWidth & documentElement.scrollWidth
+     * @returns {number}
+     */
+    scroll: () => {
+        return Math.max(widthCalc.bodyScroll(), widthCalc.documentElementScroll())
     }
 }
 
+/**
+ * Gets all the basic measurements from the dimension calculation object
+ * @param dimCalc
+ * @returns {(*|number)[]}
+ */
 const getAllMeasurements = (dimCalc) => {
     return [
         dimCalc.bodyOffset(),
@@ -82,39 +163,83 @@ const getAllMeasurements = (dimCalc) => {
     ]
 }
 
+/**
+ * Gets all the elements on the page
+ * @returns {NodeListOf<Element>}
+ */
 const getAllElements = () => {
     return document.querySelectorAll('body *')
 }
 
+/**
+ * Capitalizes the first letter of a string
+ * @param string
+ * @returns {string}
+ */
 const capitalizeFirstLetter = (string) => {
     return string.charAt(0).toUpperCase() + string.slice(1)
 };
 
 class ZnSize {
-    constructor(client, method) {
+    /**
+     * @param client
+     * @param methods
+     */
+    constructor(client, methods) {
+        methods = typeof methods !== "undefined" ? methods : {}
         this.client = client
         this.timer = null
-        this.method = typeof method === 'string' ? method : 'bodyOffset'
+        this.heightMethod = typeof methods.height === "string" ? methods.height : 'bodyOffset'
+        this.widthMethod = typeof methods.width === "string" ? methods.width : 'scroll'
         this.observer = null
         this.auto = false
+        this.currentWidth =0
+        this.currentHeight = 0
     }
+
+    /**
+     * Sets the page size automatically or uses the supplied dimensions
+     * @param dimensions
+     */
     setSize(dimensions) {
-        console.log('In setSize');
-        if (typeof dimensions === 'undefined') {
+        const height = this.currentHeight
+        const width = this.currentWidth
+        this.currentHeight = this.getHeight()
+        this.currentWidth = this.getWidth()
+        console.log({
+            "originalHeight": height,
+            "newHeight": this.currentHeight,
+            "heightTolerance": Math.abs(height - this.currentHeight),
+            "sizeChanged": this.sizeChanged(height, this.currentHeight)
+        })
+
+        console.log({
+            "originalWidth": width,
+            "newWidth": this.currentWidth,
+            "widthTolerance": Math.abs(width - this.currentWidth),
+            "sizeChanged": this.sizeChanged(width, this.currentWidth)
+        })
+
+        if (typeof dimensions === "undefined") {
             dimensions = {};
         }
         if (!dimensions.height) {
-            dimensions.height = this.getHeight() + 'px'
+            dimensions.height = `${this.currentHeight}px`
         }
         if (!dimensions.width) {
-            dimensions.width =  this.getWidth() + 'px'
+            dimensions.width =  `${this.currentWidth}px`
         }
         console.log(dimensions);
         this.client.call('resize', {dimensions}, null, Infinity)
     }
+
+    /**
+     * Toggle the autosize feature, if timeout is a int value it will default to using setInterval instead of MutationObserver
+     * @param timeout
+     * @returns {null}
+     */
     autoSize(timeout) {
-        console.log ('autoSize');
-        console.log({'timeout': timeout})
+        // timeout = typeof timeout === "undefined" ? 100 : timeout //Currently override MutationObserver due to some buggy width detection
         if (this.auto) {
             this.auto = false
             if (this.observer === null) {
@@ -138,16 +263,41 @@ class ZnSize {
             : this.observer = this.setupMutation()
         this.auto = true
     }
-    getWidth() {
-        console.log(this.method)
-        return widthCalc[this.method]()
+
+    /**
+     * Get the page width
+     * @param method
+     * @returns {number}
+     */
+    getWidth(method) {
+        method = typeof method === "undefined" ? this.widthMethod : method
+        console.log(method)
+        return widthCalc[method]()
     }
-    getHeight() {
-        return heightCalc[this.method]()
+
+    /**
+     * Get the page height
+     * @param method
+     * @returns {number}
+     */
+    getHeight(method) {
+        method = typeof method === "undefined" ? this.heightMethod : method
+        console.log(method)
+        return heightCalc[method]()
     }
+
+    /**
+     * Is auto resize enabled
+     * @returns {boolean}
+     */
     isAutoEnabled() {
         return this.auto
     }
+
+    /**
+     * Sets up MutationObserver
+     * @returns {MutationObserver}
+     */
     setupMutation() {
         let mutationClass = window.MutationObserver || window.WebKitMutationObserver
         let observer = new mutationClass((mutations, observer) => {
@@ -162,6 +312,17 @@ class ZnSize {
             subtree: true
         })
         return observer
+    }
+
+    /**
+     * Check if a size has changed
+     * @param originalValue
+     * @param newValue
+     * @returns {boolean}
+     */
+    sizeChanged(originalValue, newValue, tolerance) {
+        tolerance = typeof tolerance === 'number' ? tolerance : 0
+        return !Math.abs(originalValue - newValue) <= tolerance
     }
 }
 
