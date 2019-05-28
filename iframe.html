@@ -4,6 +4,19 @@
     <meta charset="UTF-8">
     <title>iFrame Child</title>
 <!--    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">-->
+    <style>
+        #targetBox {
+            width: 50px;
+            height: 50px;
+            background-color: red;
+        }
+
+        @media screen and (max-width: 500px) {
+            #targetBox {
+                background-color: blue;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="wrapper">
@@ -28,7 +41,7 @@
                 <div align="center"><button type="submit" id="boxSizeTrigger">Change</button></div>
             </fieldset>
         </form>
-        <div style="width: 50px; height: 50px; background-color: red" id="targetBox"></div>
+        <div id="targetBox"></div>
         <script src="js/child.js"></script>
     </div>
 </body>
