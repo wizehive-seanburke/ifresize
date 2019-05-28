@@ -36,8 +36,8 @@ document.addEventListener('DOMContentLoaded', () => {
 })
 
 document.getElementById('manual').addEventListener('submit', (e) => {
-  let height = e.target.height.value + 'px'
-  let width = e.target.width.value + 'px'
+  let height = e.target.height.value
+  let width = e.target.width.value
   if (sizer.isAutoEnabled()) {
     sizer.autoSize()
     let span = document.getElementById('autosizeStatus')
@@ -48,8 +48,8 @@ document.getElementById('manual').addEventListener('submit', (e) => {
 })
 
 document.getElementById('boxSize').addEventListener('submit', (e) => {
-  let height = e.target.height.value + 'px'
-  let width = e.target.width.value + 'px'
+  let height = e.target.height.value
+  let width = e.target.width.value
   let box = document.getElementById('targetBox')
   box.style.width = width
   box.style.height = height
