@@ -2,13 +2,17 @@ import Client from './PostRCPClient'
 import ZnSize from './ZnSize'
 import '../css/flexbox.css'
 
-const client = new Client(window.location.href)
+const client = new Client(window.location.origin)
 const sizer = new ZnSize(client)
 window.sizer = sizer
 client.logging(true)
 client.start()
 let dimensions = { 'height': '100px', 'width': '300px' }
 client.call('resize', { dimensions }, null, Infinity)
+
+client.subscribe('dimensions', function (result, error) {
+  sizer.setSize(result)
+})
 
 document.getElementById('toggleBoxSize').addEventListener('click', (e) => {
   let target = document.getElementById('targetBox')
@@ -36,8 +40,8 @@ document.addEventListener('DOMContentLoaded', () => {
 })
 
 document.getElementById('manual').addEventListener('submit', (e) => {
-  let height = e.target.height.value + 'px'
-  let width = e.target.width.value + 'px'
+  let height = e.target.height.value
+  let width = e.target.width.value
   if (sizer.isAutoEnabled()) {
     sizer.autoSize()
     let span = document.getElementById('autosizeStatus')
@@ -48,8 +52,8 @@ document.getElementById('manual').addEventListener('submit', (e) => {
 })
 
 document.getElementById('boxSize').addEventListener('submit', (e) => {
-  let height = e.target.height.value + 'px'
-  let width = e.target.width.value + 'px'
+  let height = e.target.height.value
+  let width = e.target.width.value
   let box = document.getElementById('targetBox')
   box.style.width = width
   box.style.height = height
