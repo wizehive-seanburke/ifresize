@@ -1,5 +1,5 @@
 import Server from './PostRCPServer'
-const server = new Server(window.location.href)
+const server = new Server(window.location.origin)
 server.logging(true)
 server.register('resize', [['dimensions', 'Object']], 'Object', resizeHandler, 'Resize iframe to child-specified dimensions')
 

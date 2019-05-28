@@ -2,7 +2,7 @@ import Client from './PostRCPClient'
 import ZnSize from './ZnSize'
 import '../css/flexbox.css'
 
-const client = new Client(window.location.href)
+const client = new Client(window.location.origin)
 const sizer = new ZnSize(client)
 window.sizer = sizer
 client.logging(true)
