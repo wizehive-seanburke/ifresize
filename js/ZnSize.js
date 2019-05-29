@@ -198,6 +198,30 @@ class ZnSize {
     this.auto = false
     this.currentWidth = 0
     this.currentHeight = 0
+    this.events = [
+      'animationstart',
+      'webkitAnimationStart',
+      'animationiteration',
+      'webkitAnimationIteration',
+      'animationend',
+      'webkitAnimationEnd',
+      'orientationchange',
+      'transitionstart',
+      'webkitTransitionStart',
+      'MSTransitionStart',
+      'oTransitionStart',
+      'otransitionstart',
+      'transitioniteration',
+      'webkitTransitionIteration',
+      'MSTransitionIteration',
+      'oTransitionIteration',
+      'otransitioniteration',
+      'transitionend',
+      'webkitTransitionEnd',
+      'MSTransitionEnd',
+      'oTransitionEnd',
+      'otransitionend'
+    ]
   }
 
   /**
@@ -209,19 +233,20 @@ class ZnSize {
     const width = this.currentWidth
     this.currentHeight = this.getHeight()
     this.currentWidth = this.getWidth()
-    console.log({
-      'originalHeight': height,
-      'newHeight': this.currentHeight,
-      'heightTolerance': Math.abs(height - this.currentHeight),
-      'sizeChanged': this.sizeChanged(height, this.currentHeight)
-    })
-
-    console.log({
-      'originalWidth': width,
-      'newWidth': this.currentWidth,
-      'widthTolerance': Math.abs(width - this.currentWidth),
-      'sizeChanged': this.sizeChanged(width, this.currentWidth)
-    })
+    // console.log({
+    //   'originalHeight': height,
+    //   'newHeight': this.currentHeight,
+    //   'heightTolerance': Math.abs(height - this.currentHeight),
+    //   'sizeChanged': this.sizeChanged(height, this.currentHeight)
+    // })
+    //
+    // console.log({
+    //   'originalWidth': width,
+    //   'newWidth': this.currentWidth,
+    //   'widthTolerance': Math.abs(width - this.currentWidth),
+    //   'sizeChanged': this.sizeChanged(width, this.currentWidth)
+    // })
+    //Implement tolerance
 
     if (typeof dimensions === 'undefined') {
       dimensions = {}
@@ -256,6 +281,7 @@ class ZnSize {
         this.observer.disconnect()
         this.observer = false
       }
+      this.removeEventHandlers()
       return null
     }
     this.setSize()
@@ -264,7 +290,25 @@ class ZnSize {
         this.setSize()
       }, timeout)
       : this.observer = this.setupMutation()
+    this.addEventHandlers()
     this.auto = true
+  }
+
+  addEventHandlers () {
+    this.events.forEach(value => {
+      window.addEventListener(value, this.handleEvent)
+    })
+  }
+
+  removeEventHandlers () {
+    this.events.forEach(value => {
+      window.removeEventListener(value, this.handleEvent)
+    })
+  }
+
+  handleEvent (e) {
+    console.table(e)
+    this.setSize()
   }
 
   /**
