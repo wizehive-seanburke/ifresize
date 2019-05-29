@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test 2</title>
+    <style>
+        .methodForm {
+            padding-bottom: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div class="methodForm">
+    <form id="changeMethods">
+        <label for="height">Height</label>
+        <select name="height" id="height">
+            <option value="bodyOffset">bodyOffset</option>
+            <option value="bodyScroll">bodyScroll</option>
+            <option value="documentElementOffset">documentElementOffset</option>
+            <option value="documentElementScroll">documentElementScroll</option>
+            <option value="furthestElement">furthestElement</option>
+            <option value="min">min</option>
+            <option value="max">max</option>
+        </select>
+        <label for="width">Width</label>
+        <select name="width" id="width">
+            <option value="scroll">scroll</option>
+            <option value="bodyOffset">bodyOffset</option>
+            <option value="bodyScroll">bodyScroll</option>
+            <option value="documentElementOffset">documentElementOffset</option>
+            <option value="documentElementScroll">documentElementScroll</option>
+            <option value="furthestElement">furthestElement</option>
+            <option value="min">min</option>
+            <option value="max">max</option>
+        </select>
+        <button type="submit">Change</button>
+    </form>
+</div>
+<iframe src="test2child.html" frameborder="1" sandbox="allow-same-origin allow-scripts" id="target"></iframe>
+<script src="js/test2.js"></script>
+</body>
+</html>

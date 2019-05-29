@@ -37,6 +37,7 @@ const getMaxElement = (side, elements) => {
       maxVal = elVal
     }
   }
+  console.log({'getMaxElement.maxVal': maxVal})
   return maxVal
 }
 
@@ -74,7 +75,7 @@ const heightCalc = {
      * @returns {number}
      */
   furthestElement: () => {
-    return Math.max(heightCalc.bodyOffset() || heightCalc.documentElementOffset(), getMaxElement('bottom', getAllElements()))
+    return getMaxElement('bottom', getAllElements())
   },
   /**
      * Get the min value of all the base measurements
@@ -126,7 +127,7 @@ const widthCalc = {
      * @returns {number}
      */
   furthestElement: () => {
-    return Math.max(widthCalc.bodyOffset() || widthCalc.documentElementOffset(), getMaxElement('right', getAllElements()))
+    return getMaxElement('right', getAllElements())
   },
   /**
      * Get the min value of all the base measurements
@@ -273,7 +274,7 @@ class ZnSize {
      */
   getWidth (method) {
     method = typeof method === 'undefined' ? this.widthMethod : method
-    console.log(method)
+    console.log({'widthMethod': method})
     return widthCalc[method]()
   }
 
@@ -284,7 +285,7 @@ class ZnSize {
      */
   getHeight (method) {
     method = typeof method === 'undefined' ? this.heightMethod : method
-    console.log(method)
+    console.log({'heightMethod': method})
     return heightCalc[method]()
   }
 
@@ -303,10 +304,9 @@ class ZnSize {
   setupMutation () {
     let MutationClass = window.MutationObserver || window.WebKitMutationObserver
     let observer = new MutationClass((mutations, observer) => {
-      // setTimeout(() => {
-      //   this.setSize()
-      // }, 100)
-      this.setSize()
+      setTimeout(() => {
+        this.setSize()
+      }, 16)
     })
     observer.observe(document.querySelector('body'), {
       attributes: true,
